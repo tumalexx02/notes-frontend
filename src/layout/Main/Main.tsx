@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { AppBar, Box, Button, Toolbar, Typography, Menu, MenuItem, Divider, ListItemIcon, useTheme } from "@mui/material";
+import { AppBar, Box, Button, Toolbar, Typography, Menu, MenuItem, Divider, ListItemIcon, useTheme, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { useAuthStore } from '../../store/AuthStore';
 import { MouseEvent, useEffect, useState } from 'react';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -13,7 +13,6 @@ const MainPage = () => {
   const theme = useTheme();
 
   const { user, getUserId, logout } = useAuthStore();
-
   const { mode, toggleMode } = useThemeStore();
 
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -30,13 +29,21 @@ const MainPage = () => {
     setMenuAnchorEl(null);
   };
 
+  const [openClosePopup, setOpenClosePopup] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpenClosePopup(true);
+  };
+
+  const handleClose = () => {
+    setOpenClosePopup(false);
+  };
+
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <AppBar color='default' position="static" sx={{boxShadow: 1}}>
         <Toolbar sx={{ display: "flex", justifyContent: "start", backgroundColor: theme.palette.background.default, minHeight: '48px !important' }}>
-          {/* <Typography variant="h5" fontWeight={"medium"}>
-            Заметки
-          </Typography> */}
           <Button color='inherit' onClick={handleMenuClick} sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
             <AccountCircleIcon sx={{ marginRight: 0.5 }} />
             <Typography variant="body2" fontWeight={"medium"} sx={{textTransform: 'none'}}>
@@ -83,13 +90,29 @@ const MainPage = () => {
           {mode === 'light' ? 'Темная тема' : 'Светлая тема'}
         </MenuItem>
         <Divider />
-        <MenuItem color='primary' onClick={logout} sx={{fontSize: '14px'}}>
+        <MenuItem color='primary' onClick={handleClickOpen} sx={{fontSize: '14px'}}>
           <ListItemIcon>
             <ExitToAppIcon color='primary' />
           </ListItemIcon>
           Выйти
         </MenuItem>
       </Menu>
+
+      <Dialog open={openClosePopup} onClose={handleClose}>
+        <DialogTitle>Выход</DialogTitle>
+        <DialogContent>
+          Вы уверены, что хотите выйти?
+        </DialogContent>
+        <Divider />
+        <DialogActions sx={{display: 'flex', justifyContent: 'space-between'}}>
+          <Button onClick={logout} color="primary">
+            Выйти
+          </Button>
+          <Button onClick={handleClose} sx={{color: "text.secondary"}}>
+            Закрыть
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

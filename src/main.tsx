@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import './index.css';
@@ -9,9 +9,14 @@ import { RegisterPage } from './pages/Register/Register';
 import { RequireAuth } from './helpers/RequireAuth';
 import MainPage from './layout/Main/Main';
 import { useThemeStore } from './store/ThemeStore';
+import { darkPaperBg, lightPaperBg } from './helpers/themeColors';
 
 const App = () => {
   const { mode } = useThemeStore();
+
+  useEffect(() => {
+    document.body.style.backgroundColor = mode === 'light' ? lightPaperBg : darkPaperBg;
+  }, [mode])
 
   const theme = createTheme({
     palette: {
@@ -24,7 +29,7 @@ const App = () => {
       },
       background: {
         default: mode === 'light' ? "#EAF6FF" : "#1B1B1B",
-        paper: mode === 'light' ? "#FBFFFE" : "#1E1E1E"
+        paper: mode === 'light' ? lightPaperBg : darkPaperBg
       },
     },
   });
