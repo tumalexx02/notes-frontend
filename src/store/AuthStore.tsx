@@ -1,16 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import axios, { AxiosError } from 'axios';
-import { PREFIX } from '../helpers/API';
-
-const setRefreshTokenInCookie = (refreshToken: string) => {
-  document.cookie = `refresh_token=${refreshToken}; path=/; HttpOnly; Secure; SameSite=Strict`;
-};
-
-// const getRefreshTokenFromCookie = (): string | null => {
-//   const match = document.cookie.match(new RegExp('(^| )refresh_token=([^;]+)'));
-//   return match ? match[2] : null;
-// };
+import api, { PREFIX } from '../helpers/API';
 
 export interface User {
   id: string
@@ -22,22 +13,26 @@ export interface User {
 }
 
 interface AuthState {
-  jwtToken: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
   user: User | null;
   loginErrorMessage: string | null;
   registerErrorMessage: string | null;
   createAccount: (name: string, email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
-  getUserId: () => void;
+  refresh: () => Promise<void>;
+  getMe: () => void;
   logout: () => void;
   clearErrors: () => void;
+  clearUser: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   devtools(
     persist(
       (set, get) => ({
-        jwtToken: null,
+        accessToken: null,
+        refreshToken: null,
         loginErrorMessage: null,
         registerErrorMessage: null,
         user: null,
@@ -48,9 +43,7 @@ export const useAuthStore = create<AuthState>()(
             const accessToken = response.data['tokens']['access_token'];
             const refreshToken = response.data['tokens']['refresh_token'];
 
-            set({ jwtToken: accessToken, registerErrorMessage: null });
-
-            setRefreshTokenInCookie(refreshToken);
+            set({ accessToken: accessToken, refreshToken: refreshToken, registerErrorMessage: null });
           } catch (e) {
             if (e instanceof AxiosError) {
               const errorMessage = e.response?.data?.error || e.message;
@@ -65,9 +58,7 @@ export const useAuthStore = create<AuthState>()(
             const accessToken = response.data['tokens']['access_token'];
             const refreshToken = response.data['tokens']['refresh_token'];
 
-            set({ jwtToken: accessToken, loginErrorMessage: null });
-
-            setRefreshTokenInCookie(refreshToken);
+            set({ accessToken: accessToken, refreshToken: refreshToken, loginErrorMessage: null });
           } catch (e) {
             if (e instanceof AxiosError) {
               const errorMessage = e.response?.data?.error || e.message;
@@ -76,37 +67,49 @@ export const useAuthStore = create<AuthState>()(
           }
         },
 
-        getUserId: async () => {
-          const jwt = get().jwtToken;
+        refresh: async () => {
           try {
-            const response = await axios.get(`${PREFIX}/user/me`, {
-              headers: {
-                'Authorization': `Bearer ${jwt}`
-              }
-            });
+            const refreshToken = get().refreshToken;
+            if (!refreshToken) throw new Error('No refresh token available');
+        
+            const response = await axios.post(`${PREFIX}/user/refresh`, { refresh_token: refreshToken });
+            const accessToken = response.data['access_token'];
+        
+            console.log("New accessToken:", accessToken);
+            set({ accessToken: accessToken });
+          } catch (e) {
+            console.error('Refresh token failed', e);
+            set({ accessToken: null, refreshToken: null, user: null });
+          }
+        },
+
+        getMe: async () => {
+          try {
+            const response = await api.get(`${PREFIX}/user/me`);
 
             set({ user: response.data['user'] })
           } catch (e) {
-            if (e instanceof AxiosError) {
-              console.error(e)
-            }
+            console.error("Get user failed", e);
+            get().logout();
           }
 
         },
 
         logout: () => {
-          document.cookie = 'refresh_token=; path=/; HttpOnly; Secure; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-          
-          set({ jwtToken: null, user: null });
+          document.cookie = 'refresh_token=; path=/; Secure; SameSite=Strict; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+          set({ accessToken: null, refreshToken: null, user: null });
         },
 
         clearErrors() {
           set({ loginErrorMessage: null, registerErrorMessage: null });
         },
+        clearUser() {
+          set({ accessToken: null, refreshToken: null, user: null });
+        }
       }),
       { 
         name: 'auth-store',
-        partialize: (state) => ({ jwtToken: state.jwtToken }),
+        partialize: (state) => ({ accessToken: state.accessToken, refreshToken: state.refreshToken }),
       }
     )
   )

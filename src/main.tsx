@@ -38,6 +38,12 @@ const App = () => {
     {
       path: '/',
       element: <RequireAuth><MainPage /></RequireAuth>,
+      children: [
+        {
+          path: 'note/:id',
+          element: <Typography variant="h1" component="h1">Note</Typography>
+        }
+      ]
     },
     {
       path: '/auth',

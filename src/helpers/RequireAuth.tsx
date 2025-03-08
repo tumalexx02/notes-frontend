@@ -3,9 +3,9 @@ import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/AuthStore';
 
 export const RequireAuth = ({ children }: { children: ReactNode }) => {
-  const { jwtToken } = useAuthStore();
+  const { accessToken: accessToken } = useAuthStore();
 
-  if (!jwtToken) {
+  if (!accessToken) {
     return <Navigate to="/auth/login" replace />
   }
   return children;

@@ -8,18 +8,53 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import { useThemeStore } from '../../store/ThemeStore';
+import { PREFIX } from '../../helpers/API';
+import Sidebar from '../../components/Sidebar/Sidebar';
+
+export interface Note {
+  id: number
+  user_id: string
+  title: string
+  created_at: string
+  updated_at: string
+  public_id: string
+}
 
 const MainPage = () => {
   const theme = useTheme();
 
-  const { user, getUserId, logout } = useAuthStore();
+  const { accessToken, user, getMe, logout } = useAuthStore();
   const { mode, toggleMode } = useThemeStore();
 
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
-    getUserId();
-  }, []);
+    getMe();
+  }, [accessToken]);
+
+  useEffect(() => {
+    const fetchNotes = async () => {
+      try {
+        const response = await fetch(`${PREFIX}/note/list`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        if (!response.ok) throw new Error("Ошибка загрузки заметок");
+        
+        const data = await response.json();
+
+        setNotes(data.data)
+      } catch (error) {
+        console.error("Ошибка при загрузке заметок:", error);
+        setNotes([]);
+      }
+    };
+  
+    if (accessToken) fetchNotes();
+  }, [accessToken]);
 
   const handleMenuClick = (event: MouseEvent<HTMLButtonElement>) => {
     setMenuAnchorEl(event.currentTarget);
@@ -38,12 +73,12 @@ const MainPage = () => {
   const handleClose = () => {
     setOpenClosePopup(false);
   };
-
+  
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      <AppBar color='default' position="static" sx={{boxShadow: 1}}>
-        <Toolbar sx={{ display: "flex", justifyContent: "start", backgroundColor: theme.palette.background.default, minHeight: '48px !important' }}>
+      <AppBar color='default' position="static" sx={{boxShadow: 0}}>
+        <Toolbar sx={{ display: "flex", justifyContent: "start", backgroundColor: theme.palette.background.default, minHeight: '48px !important', borderBottomColor: '#848484', borderBottomWidth: 0.1 }}>
           <Button color='inherit' onClick={handleMenuClick} sx={{ display: 'flex', alignItems: 'center', ml: 'auto' }}>
             <AccountCircleIcon sx={{ marginRight: 0.5 }} />
             <Typography variant="body2" fontWeight={"medium"} sx={{textTransform: 'none'}}>
@@ -52,8 +87,11 @@ const MainPage = () => {
           </Button>
         </Toolbar>
       </AppBar>
-      <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: theme.palette.background.paper }}>
-        <Outlet />
+      <Box sx={{ display: "flex", flexGrow: 1 }}>
+        <Sidebar notes={notes} searchQuery={searchQuery} setSearchQuery={setSearchQuery} setNotes={setNotes} />
+        <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Outlet />
+        </Box>
       </Box>
       <Menu
         anchorEl={menuAnchorEl}

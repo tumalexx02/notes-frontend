@@ -7,16 +7,16 @@ const LoginPage = () => {
   const theme = useTheme();
 
   const navigate = useNavigate();
-  const {jwtToken, login, loginErrorMessage, clearErrors} = useAuthStore();
+  const {accessToken: accessToken, login, loginErrorMessage, clearErrors} = useAuthStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   useEffect(() => {
-    if (jwtToken) {
+    if (accessToken) {
       navigate('/');
     }
-  }, [jwtToken, navigate]);
+  }, [accessToken, navigate]);
 
   useEffect(() => {
     clearErrors();
@@ -73,7 +73,7 @@ const LoginPage = () => {
           {loginErrorMessage}
         </Typography>
       )}
-      {jwtToken && (
+      {accessToken && (
         <Typography color="success" sx={{ mt: 2, textAlign: "center" }}>
           Вы успешно вошли!
         </Typography>

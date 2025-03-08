@@ -7,17 +7,17 @@ const RegisterPage = () => {
   const theme = useTheme();
 
   const navigate = useNavigate();
-  const {jwtToken, createAccount, registerErrorMessage, clearErrors} = useAuthStore();
+  const {accessToken: accessToken, createAccount, registerErrorMessage, clearErrors} = useAuthStore();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   useEffect(() => {
-    if (jwtToken) {
+    if (accessToken) {
       navigate('/');
     }
-  }, [jwtToken, navigate]);
+  }, [accessToken, navigate]);
 
   useEffect(() => {
     clearErrors();
@@ -59,7 +59,7 @@ const RegisterPage = () => {
           {registerErrorMessage}
         </Typography>
       )}
-      {jwtToken && (
+      {accessToken && (
         <Typography color="success" sx={{ textAlign: "center" }}>
           Вы успешно вошли!
         </Typography>
