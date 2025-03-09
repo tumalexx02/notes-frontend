@@ -1,49 +1,31 @@
-// Sidebar.tsx
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, TextField } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, ListItemIcon, TextField } from "@mui/material";
 import NoteList from '../NoteList/NoteList';
-import { Note } from '../../layout/Main/Main';
 import { useState } from 'react';
-import api from '../../helpers/API';
-import { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useNotesStore } from '../../store/NotesStore';
+import CreateIcon from '@mui/icons-material/Create';
 
 interface SidebarProps {
-  notes: Note[];
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  setNotes: (notes: Note[]) => void;
 }
 
-interface NoteResult {
-  data: Note
-}
-
-const Sidebar = ({ notes, searchQuery, setSearchQuery, setNotes }: SidebarProps) => {
+const Sidebar = ({ searchQuery, setSearchQuery }: SidebarProps) => {
   const [newNoteName, setNewNoteName] = useState('');
+
+  const { createNote } = useNotesStore();
 
   const navigate = useNavigate();
 
-  async function createNote() {
-    try {
-      const response = await api.post(`/note/create`, { 'title': newNoteName });
+  async function onCreateBtnClick() {
+    const note_id = await createNote(newNoteName);
 
-      const note_id = await response.data['note_id'];
-
-      const noteResponse = await api.get<NoteResult>(`/note/${note_id}`);
-
-      const newNote = noteResponse.data.data;
-
-      setNotes(notes.concat(newNote));
+    if (note_id) {
       setNewNoteName('');
       handleClose();
       navigate('/note/' + note_id);
-    } catch (e) {
-       if (e instanceof AxiosError) {
-        console.error("Ошибка при создании заметки:", e);
-       }
     }
   }
-
 
   const [openCreatePopup, setOpenCreatePopup] = useState(false);
   
@@ -68,9 +50,12 @@ const Sidebar = ({ notes, searchQuery, setSearchQuery, setNotes }: SidebarProps)
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </Box>
-      <NoteList notes={notes} searchQuery={searchQuery} />
+      <NoteList searchQuery={searchQuery} />
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", p: 2, borderTopColor: '#848484', borderTopWidth: 0.1 }}>
         <Button color='primary' variant='contained' onClick={handleClickOpen} sx={{ width: '100%' }}>
+          <ListItemIcon sx={{mr: 1, minWidth: 'unset', color: 'inherit'}}>
+            <CreateIcon sx={{ color: 'inherit' }} />
+          </ListItemIcon>
           Создать заметку
         </Button>
       </Box>
@@ -91,7 +76,7 @@ const Sidebar = ({ notes, searchQuery, setSearchQuery, setNotes }: SidebarProps)
         </DialogContent>
         <Divider />
         <DialogActions sx={{display: 'flex', justifyContent: 'space-between'}}>
-          <Button onClick={createNote} color="primary">
+          <Button onClick={onCreateBtnClick} color="primary">
             Создать
           </Button>
           <Button onClick={handleClose} sx={{color: "text.secondary"}}>
@@ -100,7 +85,6 @@ const Sidebar = ({ notes, searchQuery, setSearchQuery, setNotes }: SidebarProps)
         </DialogActions>
       </Dialog>
     </Box>
-    
   );
 };
 

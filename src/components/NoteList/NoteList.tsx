@@ -1,14 +1,26 @@
 import { List } from "@mui/material";
 import NoteListItem from './NoteListItem/NoteListItem';
-import { Note } from '../../layout/Main/Main';
+import { useNotesStore } from '../../store/NotesStore';
+import { useEffect } from 'react';
+import { useAuthStore } from '../../store/AuthStore';
 
 
 interface NoteListProps {
-  notes: Note[];
   searchQuery: string;
 }
 
-const NoteList = ({ notes, searchQuery }: NoteListProps) => {
+const NoteList = ({ searchQuery }: NoteListProps) => {
+  const { notes, getNotes } = useNotesStore();
+  const { accessToken } = useAuthStore();
+
+  useEffect(() => {
+    getNotes();
+  }, [accessToken, getNotes]);
+
+  useEffect(() => {
+    console.log("Notes updated:", notes);
+  }, [notes]);
+
   return (
     <List sx={{ flexGrow: 1, overflow: 'auto', p: 0 }}>
       {notes.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map((note) => {
@@ -16,7 +28,7 @@ const NoteList = ({ notes, searchQuery }: NoteListProps) => {
           return null;
         } else {
           return (
-            <NoteListItem key={note.id} note={note} notes={notes} />
+            <NoteListItem key={note.id} note={note} />
           );
         }
       })}

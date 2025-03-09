@@ -8,17 +8,7 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import { useThemeStore } from '../../store/ThemeStore';
-import { PREFIX } from '../../helpers/API';
 import Sidebar from '../../components/Sidebar/Sidebar';
-
-export interface Note {
-  id: number
-  user_id: string
-  title: string
-  created_at: string
-  updated_at: string
-  public_id: string
-}
 
 const MainPage = () => {
   const theme = useTheme();
@@ -27,34 +17,11 @@ const MainPage = () => {
   const { mode, toggleMode } = useThemeStore();
 
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [notes, setNotes] = useState<Note[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
     getMe();
-  }, [accessToken]);
-
-  useEffect(() => {
-    const fetchNotes = async () => {
-      try {
-        const response = await fetch(`${PREFIX}/note/list`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        if (!response.ok) throw new Error("Ошибка загрузки заметок");
-        
-        const data = await response.json();
-
-        setNotes(data.data)
-      } catch (error) {
-        console.error("Ошибка при загрузке заметок:", error);
-        setNotes([]);
-      }
-    };
-  
-    if (accessToken) fetchNotes();
-  }, [accessToken]);
+  }, [accessToken, getMe]);
 
   const handleMenuClick = (event: MouseEvent<HTMLButtonElement>) => {
     setMenuAnchorEl(event.currentTarget);
@@ -88,7 +55,7 @@ const MainPage = () => {
         </Toolbar>
       </AppBar>
       <Box sx={{ display: "flex", flexGrow: 1 }}>
-        <Sidebar notes={notes} searchQuery={searchQuery} setSearchQuery={setSearchQuery} setNotes={setNotes} />
+        <Sidebar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Outlet />
         </Box>
