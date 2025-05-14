@@ -54,7 +54,7 @@ const MainPage = () => {
           </Button>
         </Toolbar>
       </AppBar>
-      <Box sx={{ display: "flex", flexGrow: 1 }}>
+      <Box sx={{ display: "flex", flexGrow: 1, maxHeight: "calc(100vh - 48px)" }}>
         <Sidebar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Outlet />
@@ -81,13 +81,6 @@ const MainPage = () => {
           },
         }}
       >
-        <MenuItem color='primary' onClick={handleCloseMenu} sx={{fontSize: '14px'}}>
-          <ListItemIcon>
-            <UserIcon color='primary' />
-          </ListItemIcon>
-          Профиль
-        </MenuItem>
-        <Divider />
         <MenuItem color='primary' onClick={toggleMode} sx={{fontSize: '14px'}}>
           <ListItemIcon>
             {mode === 'light' ? <DarkModeIcon color='primary' /> : <LightModeIcon color='primary' />}

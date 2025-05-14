@@ -67,7 +67,6 @@ const Sidebar = ({ searchQuery, setSearchQuery }: SidebarProps) => {
             margin="dense"
             id="name"
             label="Название"
-            type="text"
             variant="standard"
             required
             onChange={(e) => setNewNoteName(e.target.value)}

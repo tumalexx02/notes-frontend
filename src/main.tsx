@@ -10,6 +10,9 @@ import { RequireAuth } from './helpers/RequireAuth';
 import MainPage from './layout/Main/Main';
 import { useThemeStore } from './store/ThemeStore';
 import { darkPaperBg, lightPaperBg } from './helpers/themeColors';
+import { NotePage } from './pages/Note/Note';
+import PublicLayout from './layout/Public/Public';
+import { PublicNotePage } from './pages/PublicNote/PublicNote';
 
 const App = () => {
   const { mode } = useThemeStore();
@@ -41,7 +44,7 @@ const App = () => {
       children: [
         {
           path: 'note/:id',
-          element: <Typography variant="h1" component="h1">Note</Typography>
+          element: <NotePage />
         }
       ]
     },
@@ -65,7 +68,13 @@ const App = () => {
     },
     {
       path: '/public',
-      element: <Typography variant="h1" component="h1">Public</Typography>
+      element: <PublicLayout />,
+      children: [
+        {
+          path: ':id',
+          element: <PublicNotePage />
+        }
+      ]
     },
     {
       path: '*',

@@ -9,14 +9,38 @@ export interface ShortNote {
   title: string
   created_at: string
   updated_at: string
+  public_id: string | null
+}
+
+export interface FullNote {
+  id: number
+  user_id: string
+  title: string
+  nodes: NoteNode[]
+  created_at: string
+  updated_at: string
   public_id: string
 }
+
+export interface NoteNode {
+  id: number
+  note_id: number
+  order: number
+  content_type: contentType
+  content?: string
+}
+
+export type contentType = 'text' | 'image'
 
 interface NotesState {
   notes: ShortNote[]
   getNotes: () => void
   createNote: (newNoteName: string) => number
   deleteNote: (noteId: number) => void
+  getNote: (noteId: number) => FullNote
+  getPublicNote: (publicId: string) => FullNote
+  makeNotePublic: (noteId: number) => void
+  makeNotePrivate: (noteId: number) => void
 }
 
 export const useNotesStore = create<NotesState>()(
@@ -59,6 +83,54 @@ export const useNotesStore = create<NotesState>()(
         } catch (e) {
           if (e instanceof AxiosError) {
             console.error("Ошибка при удалении заметки:", e);
+          }
+        }
+      },
+      getNote: async (noteId: number): Promise<FullNote | undefined> => {
+        try {
+          const response = await api.get(`/note/${noteId}`);
+          return response.data.data;
+        } catch (e) {
+          if (e instanceof AxiosError) {
+            console.error("Ошибка при получении заметки:", e);
+          }
+        }
+      },
+      getPublicNote: async (publicId: string): Promise<FullNote | undefined> => {
+        try {
+          const response = await api.get(`${PREFIX}/public/${publicId}`);
+          return response.data;
+        } catch (e) {
+          if (e instanceof AxiosError) {
+            console.error("Ошибка при получении публичной заметки:", e);
+          }
+        }
+      },
+      makeNotePublic: async (noteId: number) => {
+        try {
+          const response = await api.patch(`${PREFIX}/note/${noteId}/public`);
+          set({
+            notes: get().notes.map(note =>
+              note.id === noteId ? { ...note, public_id: response.data['public_id'] } : note
+            )
+          });
+        } catch (e) {
+          if (e instanceof AxiosError) {
+            console.error("Ошибка при публикации заметки:", e);
+          }
+        }
+      },
+      makeNotePrivate: async (noteId: number) => {
+        try {
+          await api.patch(`${PREFIX}/note/${noteId}/private`);
+          set({
+            notes: get().notes.map(note =>
+              note.id === noteId ? { ...note, public_id: null } : note
+            )
+          });
+        } catch (e) {
+          if (e instanceof AxiosError) {
+            console.error("Ошибка при скрытии заметки:", e);
           }
         }
       }

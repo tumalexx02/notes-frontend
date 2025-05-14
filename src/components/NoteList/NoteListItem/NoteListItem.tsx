@@ -3,11 +3,14 @@ import { Box, IconButton, ListItem, ListItemIcon, Menu, MenuItem, Typography, us
 import { NavLink } from 'react-router-dom';
 import MoreIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PublicIcon from '@mui/icons-material/Public';
+import LockIcon from '@mui/icons-material/Lock';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { ShortNote, useNotesStore } from '../../../store/NotesStore';
 
 const NoteListItem = ({ note }: { note: ShortNote }) => {
   const theme = useTheme();
-  const { deleteNote } = useNotesStore();
+  const { deleteNote, makeNotePublic, makeNotePrivate } = useNotesStore();
   
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(menuAnchorEl);
@@ -24,6 +27,21 @@ const NoteListItem = ({ note }: { note: ShortNote }) => {
   const handleDelete = () => {
     handleCloseMenu();
     deleteNote(note.id);
+  };
+
+  const handlePublicToggle = async () => {
+    handleCloseMenu();
+    if (note.public_id) {
+      await makeNotePrivate(note.id);
+    } else {
+      await makeNotePublic(note.id);
+    }
+  };
+
+  const handleCopyLink = () => {
+    handleCloseMenu();
+    navigator.clipboard.writeText(`${window.location.origin}/public/${note.public_id}`);
+    console.log(note.public_id);
   };
 
   return (
@@ -97,6 +115,20 @@ const NoteListItem = ({ note }: { note: ShortNote }) => {
           },
         }}
       >
+        {note.public_id && (
+          <MenuItem onClick={handleCopyLink} sx={{ fontSize: '14px' }}>
+            <ListItemIcon>
+              <ContentCopyIcon color='primary' />
+            </ListItemIcon>
+            Скопировать ссылку
+          </MenuItem>
+        )}
+        <MenuItem onClick={handlePublicToggle} sx={{ fontSize: '14px' }}>
+          <ListItemIcon>
+            {note.public_id ? <LockIcon color='primary' /> : <PublicIcon color='primary' />}
+          </ListItemIcon>
+          {note.public_id ? 'Сделать приватной' : 'Опубликовать'}
+        </MenuItem>
         <MenuItem onClick={handleDelete} sx={{ fontSize: '14px' }}>
           <ListItemIcon>
             <DeleteIcon color='primary' />

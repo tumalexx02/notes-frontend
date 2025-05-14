@@ -7,7 +7,7 @@ const RegisterPage = () => {
   const theme = useTheme();
 
   const navigate = useNavigate();
-  const {accessToken: accessToken, createAccount, registerErrorMessage, clearErrors} = useAuthStore();
+  const {accessToken, createAccount, registerErrorMessage, clearErrors} = useAuthStore();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

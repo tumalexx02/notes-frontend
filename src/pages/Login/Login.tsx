@@ -7,7 +7,7 @@ const LoginPage = () => {
   const theme = useTheme();
 
   const navigate = useNavigate();
-  const {accessToken: accessToken, login, loginErrorMessage, clearErrors} = useAuthStore();
+  const {accessToken, login, loginErrorMessage, clearErrors} = useAuthStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

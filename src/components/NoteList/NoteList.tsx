@@ -16,11 +16,7 @@ const NoteList = ({ searchQuery }: NoteListProps) => {
   useEffect(() => {
     getNotes();
   }, [accessToken, getNotes]);
-
-  useEffect(() => {
-    console.log("Notes updated:", notes);
-  }, [notes]);
-
+  
   return (
     <List sx={{ flexGrow: 1, overflow: 'auto', p: 0 }}>
       {notes.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map((note) => {
