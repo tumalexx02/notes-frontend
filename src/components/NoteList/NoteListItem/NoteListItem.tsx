@@ -6,11 +6,13 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import PublicIcon from '@mui/icons-material/Public';
 import LockIcon from '@mui/icons-material/Lock';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import UnarchiveIcon from '@mui/icons-material/Unarchive';
 import { ShortNote, useNotesStore } from '../../../store/NotesStore';
 
 const NoteListItem = ({ note }: { note: ShortNote }) => {
   const theme = useTheme();
-  const { deleteNote, makeNotePublic, makeNotePrivate } = useNotesStore();
+  const { deleteNote, makeNotePublic, makeNotePrivate, archiveNote, unarchiveNote } = useNotesStore();
   
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(menuAnchorEl);
@@ -42,6 +44,15 @@ const NoteListItem = ({ note }: { note: ShortNote }) => {
     handleCloseMenu();
     navigator.clipboard.writeText(`${window.location.origin}/public/${note.public_id}`);
     console.log(note.public_id);
+  };
+
+  const handleArchiveToggle = async () => {
+    handleCloseMenu();
+    if (note.archived_at) {
+      await unarchiveNote(note.id);
+    } else {
+      await archiveNote(note.id);
+    }
   };
 
   return (
@@ -128,6 +139,12 @@ const NoteListItem = ({ note }: { note: ShortNote }) => {
             {note.public_id ? <LockIcon color='primary' /> : <PublicIcon color='primary' />}
           </ListItemIcon>
           {note.public_id ? 'Сделать приватной' : 'Опубликовать'}
+        </MenuItem>
+        <MenuItem onClick={handleArchiveToggle} sx={{ fontSize: '14px' }}>
+          <ListItemIcon>
+            {note.archived_at ? <UnarchiveIcon color='primary' /> : <ArchiveIcon color='primary' />}
+          </ListItemIcon>
+          {note.archived_at ? 'Разархивировать' : 'Архивировать'}
         </MenuItem>
         <MenuItem onClick={handleDelete} sx={{ fontSize: '14px' }}>
           <ListItemIcon>

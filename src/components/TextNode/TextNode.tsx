@@ -1,5 +1,5 @@
 import { Box, IconButton, TextField } from '@mui/material';
-import { Delete } from '@mui/icons-material';
+import { Delete, KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material';
 import { useCallback, useEffect, useState } from 'react';
 import { useTheme } from '@emotion/react';
 import api from '../../helpers/API';
@@ -12,10 +12,13 @@ interface TextNodeProps {
     order: number;
   };
   onDelete?: (nodeId: number) => void;
+  onUpdateOrder?: (nodeId: number, oldOrder: number, newOrder: number) => Promise<void>;
   isOnly?: boolean;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
-export const TextNode = ({ node, onDelete, isOnly }: TextNodeProps) => {
+export const TextNode = ({ node, onDelete, onUpdateOrder, isOnly, isFirst, isLast }: TextNodeProps) => {
   const theme = useTheme();
   const [content, setContent] = useState(node.content);
   const [isHovered, setIsHovered] = useState(false);
@@ -60,12 +63,40 @@ export const TextNode = ({ node, onDelete, isOnly }: TextNodeProps) => {
       sx={{ 
         position: 'relative',
         width: '100%',
+        '&:hover .control-button': { opacity: 1 },
         '&:hover .delete-button': { opacity: isOnly ? 0 : 1 },
         mb: 2
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      <Box sx={{ display: 'flex', position: 'absolute', flexDirection: 'column', left: -40, top: '50%', transform: 'translateY(-50%)' }}>
+        {!isFirst && !isOnly && (
+          <IconButton
+            className="control-button"
+            onClick={() => onUpdateOrder?.(node.id, node.order, node.order - 1)}
+            sx={{
+              opacity: 0,
+              transition: 'opacity 0.2s',
+              mb: 0.5
+            }}
+          >
+            <KeyboardArrowUp />
+          </IconButton>
+        )}
+        {!isLast && !isOnly && (
+          <IconButton
+            className="control-button"
+            onClick={() => onUpdateOrder?.(node.id, node.order, node.order + 1)}
+            sx={{
+              opacity: 0,
+              transition: 'opacity 0.2s'
+            }}
+          >
+            <KeyboardArrowDown />
+          </IconButton>
+        )}
+      </Box>
       <TextField
         fullWidth
         multiline

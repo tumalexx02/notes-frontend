@@ -1,5 +1,5 @@
 import { Box, IconButton } from '@mui/material';
-import { Delete, Upload } from '@mui/icons-material';
+import { Delete, Upload, KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material';
 import { useCallback, useState, useEffect } from 'react';
 import { useTheme } from '@emotion/react';
 import api from '../../helpers/API';
@@ -7,14 +7,18 @@ import api from '../../helpers/API';
 interface ImageNodeProps {
   node: {
     id: number;
-    type: string;
     content: string;
+    type: string;
+    order: number;
   };
-  onDelete: (id: number) => void;
-  isOnly: boolean;
+  onDelete?: (nodeId: number) => void;
+  onUpdateOrder?: (nodeId: number, oldOrder: number, newOrder: number) => Promise<void>;
+  isOnly?: boolean;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
-export const ImageNode = ({ node, onDelete, isOnly }: ImageNodeProps) => {
+export const ImageNode = ({ node, onDelete, onUpdateOrder, isOnly, isFirst, isLast }: ImageNodeProps) => {
   const [imageUrl, setImageUrl] = useState<string>('');
   const [isHovered, setIsHovered] = useState(false);
   const theme = useTheme();
@@ -66,7 +70,7 @@ export const ImageNode = ({ node, onDelete, isOnly }: ImageNodeProps) => {
   const handleDelete = async () => {
     try {
       await api.delete(`/node/${node.id}`);
-      onDelete(node.id);
+      onDelete?.(node.id);
     } catch (error) {
       console.error('Failed to delete node:', error);
     }
@@ -77,12 +81,39 @@ export const ImageNode = ({ node, onDelete, isOnly }: ImageNodeProps) => {
       sx={{ 
         position: 'relative',
         width: '100%',
-        mb: 2,
-        '&:hover .delete-button': { opacity: isOnly ? 0 : 1 }
+        '&:hover .control-button': { opacity: 1 },
+        mb: 2
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      <Box sx={{ display: 'flex', position: 'absolute', flexDirection: 'column', left: -40, top: '50%', transform: 'translateY(-50%)', zIndex: 1 }}>
+        {!isFirst && !isOnly && (
+          <IconButton
+            className="control-button"
+            onClick={() => onUpdateOrder?.(node.id, node.order, node.order - 1)}
+            sx={{
+              opacity: 0,
+              transition: 'opacity 0.2s',
+              mb: 0.5
+            }}
+          >
+            <KeyboardArrowUp />
+          </IconButton>
+        )}
+        {!isLast && !isOnly && (
+          <IconButton
+            className="control-button"
+            onClick={() => onUpdateOrder?.(node.id, node.order, node.order + 1)}
+            sx={{
+              opacity: 0,
+              transition: 'opacity 0.2s'
+            }}
+          >
+            <KeyboardArrowDown />
+          </IconButton>
+        )}
+      </Box>
       <Box sx={{ 
         width: '100%', 
         minHeight: 200,

@@ -1,9 +1,11 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, ListItemIcon, TextField } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, ListItemIcon, TextField, Typography } from "@mui/material";
 import NoteList from '../NoteList/NoteList';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotesStore } from '../../store/NotesStore';
 import CreateIcon from '@mui/icons-material/Create';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import UnarchiveIcon from '@mui/icons-material/UnarchiveOutlined';
 
 interface SidebarProps {
   searchQuery: string;
@@ -12,9 +14,10 @@ interface SidebarProps {
 
 const Sidebar = ({ searchQuery, setSearchQuery }: SidebarProps) => {
   const [newNoteName, setNewNoteName] = useState('');
+  const [isArchive, setIsArchive] = useState(false);
+  const [openCreatePopup, setOpenCreatePopup] = useState(false);
 
   const { createNote } = useNotesStore();
-
   const navigate = useNavigate();
 
   async function onCreateBtnClick() {
@@ -26,8 +29,6 @@ const Sidebar = ({ searchQuery, setSearchQuery }: SidebarProps) => {
       navigate('/note/' + note_id);
     }
   }
-
-  const [openCreatePopup, setOpenCreatePopup] = useState(false);
   
   const handleClickOpen = () => {
     setOpenCreatePopup(true);
@@ -40,6 +41,12 @@ const Sidebar = ({ searchQuery, setSearchQuery }: SidebarProps) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", width: 300, backgroundColor: 'background.default', boxShadow: 1, borderRightColor: '#848484', borderRightWidth: 0.1 }}>
       <Box sx={{ p: 2, borderBottomColor: '#848484', borderBottomWidth: 0.1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          {isArchive && <ArchiveIcon sx={{ color: 'text.secondary', fontSize: 20 }} />}
+          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+            {isArchive ? 'Архив заметок' : 'Заметки'}
+          </Typography>
+        </Box>
         <TextField
           size='small'
           fullWidth
@@ -50,13 +57,21 @@ const Sidebar = ({ searchQuery, setSearchQuery }: SidebarProps) => {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </Box>
-      <NoteList searchQuery={searchQuery} />
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", p: 2, borderTopColor: '#848484', borderTopWidth: 0.1 }}>
-        <Button color='primary' variant='contained' onClick={handleClickOpen} sx={{ width: '100%' }}>
+      <NoteList searchQuery={searchQuery} isArchive={isArchive} />
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1, p: 2, borderTopColor: '#848484', borderTopWidth: 0.1 }}>
+        {!isArchive && (
+          <Button color='primary' variant='contained' onClick={handleClickOpen}>
+            <ListItemIcon sx={{mr: 1, minWidth: 'unset', color: 'inherit'}}>
+              <CreateIcon sx={{ color: 'inherit' }} />
+            </ListItemIcon>
+            Создать заметку
+          </Button>
+        )}
+        <Button color='primary' variant='outlined' onClick={() => setIsArchive(!isArchive)}>
           <ListItemIcon sx={{mr: 1, minWidth: 'unset', color: 'inherit'}}>
-            <CreateIcon sx={{ color: 'inherit' }} />
+            {isArchive ? <UnarchiveIcon sx={{ color: 'inherit' }} /> : <ArchiveIcon sx={{ color: 'inherit' }} />}
           </ListItemIcon>
-          Создать заметку
+          {isArchive ? 'Скрыть архив' : 'Показать архив'}
         </Button>
       </Box>
       <Dialog open={openCreatePopup} onClose={handleClose}>

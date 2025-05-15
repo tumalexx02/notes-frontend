@@ -9,7 +9,8 @@ export interface ShortNote {
   title: string
   created_at: string
   updated_at: string
-  public_id: string | null
+  public_id: string | null | undefined
+  archived_at: string | null | undefined
 }
 
 export interface FullNote {
@@ -20,6 +21,7 @@ export interface FullNote {
   created_at: string
   updated_at: string
   public_id: string
+  archived_at: string | null
 }
 
 export interface NoteNode {
@@ -41,6 +43,8 @@ interface NotesState {
   getPublicNote: (publicId: string) => FullNote
   makeNotePublic: (noteId: number) => void
   makeNotePrivate: (noteId: number) => void
+  archiveNote: (noteId: number) => void
+  unarchiveNote: (noteId: number) => void
 }
 
 export const useNotesStore = create<NotesState>()(
@@ -131,6 +135,34 @@ export const useNotesStore = create<NotesState>()(
         } catch (e) {
           if (e instanceof AxiosError) {
             console.error("Ошибка при скрытии заметки:", e);
+          }
+        }
+      },
+      archiveNote: async (noteId: number) => {
+        try {
+          await api.patch(`${PREFIX}/note/${noteId}/archive`);
+          set({
+            notes: get().notes.map(note =>
+              note.id === noteId ? { ...note, archived_at: new Date().toISOString() } : note
+            )
+          });
+        } catch (e) {
+          if (e instanceof AxiosError) {
+            console.error("Ошибка при архивации заметки:", e);
+          }
+        }
+      },
+      unarchiveNote: async (noteId: number) => {
+        try {
+          await api.patch(`${PREFIX}/note/${noteId}/unarchive`);
+          set({
+            notes: get().notes.map(note =>
+              note.id === noteId ? { ...note, archived_at: null } : note
+            )
+          });
+        } catch (e) {
+          if (e instanceof AxiosError) {
+            console.error("Ошибка при разархивации заметки:", e);
           }
         }
       }

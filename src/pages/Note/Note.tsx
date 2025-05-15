@@ -82,6 +82,34 @@ const NotePage = () => {
     setIsEditingTitle(true);
   };
 
+  const handleUpdateNodeOrder = useCallback(async (nodeId: number, oldOrder: number, newOrder: number) => {
+    if (!note) return;
+
+    const updatedNodes = [...note.nodes];
+    const movingNode = updatedNodes.find(n => n.id === nodeId);
+    if (!movingNode) return;
+
+    const targetNode = updatedNodes.find(n => n.order === newOrder);
+    if (!targetNode) return;
+
+    try {
+      await api.patch(`/note/${id}/order`, {
+        old_order: oldOrder,
+        new_order: newOrder
+      });
+
+      movingNode.order = newOrder;
+      targetNode.order = oldOrder;
+
+      setNote({
+        ...note,
+        nodes: updatedNodes
+      });
+    } catch (error) {
+      console.error('Failed to update node order:', error);
+    }
+  }, [id, note]);
+
   return (
     <Box sx={{ display: 'flex', justifyContent: 'start', alignItems: 'start', height: '100%', flexDirection: 'column', py: 8, width: 800 }}>
       <Box 
@@ -115,18 +143,24 @@ const NotePage = () => {
       {note?.nodes
         .slice()
         .sort((a, b) => a.order - b.order)
-        .map((node) => (
-        <Box key={'id' + note.id + 'order' + node.order} sx={{ width: '100%' }}>
+        .map((node, index) => (
+        <Box key={node.id} sx={{ width: '100%' }}>
           {node.content_type === 'text' ? (
             <TextNode 
               node={{ ...node, type: 'text', content: node.content || '' }} 
               onDelete={handleDeleteNode}
+              onUpdateOrder={handleUpdateNodeOrder}
+              isFirst={index === 0}
+              isLast={index === note.nodes.length - 1}
               isOnly={note.nodes.length === 1}
             />
           ) : (
             <ImageNode 
               node={{ ...node, type: 'image', content: node.content || '' }}
               onDelete={handleDeleteNode}
+              onUpdateOrder={handleUpdateNodeOrder}
+              isFirst={index === 0}
+              isLast={index === note.nodes.length - 1}
               isOnly={note.nodes.length === 1}
             />
           )}

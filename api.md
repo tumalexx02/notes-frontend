@@ -90,6 +90,13 @@
 - **Auth Required:** Yes
 - **Headers:** `Authorization: Bearer {token}`
 - **URL Params:** `id=[string]`
+- **Request Body:**
+  ```json
+  {
+    "old_order": 0,
+    "new_order": 0
+  }
+  ```
 
 ### Make Note Public
 - **Method:** PATCH
