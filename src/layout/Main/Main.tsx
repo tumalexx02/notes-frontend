@@ -56,7 +56,12 @@ const MainPage = () => {
       </AppBar>
       <Box sx={{ display: "flex", flexGrow: 1, maxHeight: "calc(100vh - 48px)" }}>
         <Sidebar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-        <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Box sx={{ 
+          flexGrow: 1, 
+          display: "flex",
+          overflow: 'auto',
+          p: 2
+        }}>
           <Outlet />
         </Box>
       </Box>

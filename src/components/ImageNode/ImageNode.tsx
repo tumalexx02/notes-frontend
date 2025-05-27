@@ -82,6 +82,7 @@ export const ImageNode = ({ node, onDelete, onUpdateOrder, isOnly, isFirst, isLa
         position: 'relative',
         width: '100%',
         '&:hover .control-button': { opacity: 1 },
+        '&:hover .delete-button': { opacity: isOnly ? 0 : 1 },
         mb: 2
       }}
       onMouseEnter={() => setIsHovered(true)}
@@ -157,7 +158,7 @@ export const ImageNode = ({ node, onDelete, onUpdateOrder, isOnly, isFirst, isLa
           transition: 'opacity 0.2s',
         }}
       >
-        <Delete />
+        <Delete color="primary" />
       </IconButton>
     </Box>
   );

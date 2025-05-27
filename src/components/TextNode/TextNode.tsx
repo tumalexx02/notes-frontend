@@ -137,7 +137,7 @@ export const TextNode = ({ node, onDelete, onUpdateOrder, isOnly, isFirst, isLas
           transition: 'opacity 0.2s',
         }}
       >
-        <Delete />
+        <Delete color="primary" />
       </IconButton>
     </Box>
   );

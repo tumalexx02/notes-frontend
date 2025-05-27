@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, IconButton, ListItem, ListItemIcon, Menu, MenuItem, Typography, useTheme } from '@mui/material';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import MoreIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PublicIcon from '@mui/icons-material/Public';
@@ -12,6 +12,7 @@ import { ShortNote, useNotesStore } from '../../../store/NotesStore';
 
 const NoteListItem = ({ note }: { note: ShortNote }) => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const { deleteNote, makeNotePublic, makeNotePrivate, archiveNote, unarchiveNote } = useNotesStore();
   
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
@@ -26,12 +27,17 @@ const NoteListItem = ({ note }: { note: ShortNote }) => {
     setMenuAnchorEl(null);
   };
 
-  const handleDelete = () => {
+  const handleDelete = (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
     handleCloseMenu();
     deleteNote(note.id);
+    navigate('/');
   };
 
-  const handlePublicToggle = async () => {
+  const handlePublicToggle = async (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
     handleCloseMenu();
     if (note.public_id) {
       await makeNotePrivate(note.id);
@@ -40,13 +46,16 @@ const NoteListItem = ({ note }: { note: ShortNote }) => {
     }
   };
 
-  const handleCopyLink = () => {
+  const handleCopyLink = (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
     handleCloseMenu();
     navigator.clipboard.writeText(`${window.location.origin}/public/${note.public_id}`);
-    console.log(note.public_id);
   };
 
-  const handleArchiveToggle = async () => {
+  const handleArchiveToggle = async (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
     handleCloseMenu();
     if (note.archived_at) {
       await unarchiveNote(note.id);

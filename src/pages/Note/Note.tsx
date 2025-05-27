@@ -111,100 +111,115 @@ const NotePage = () => {
   }, [id, note]);
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'start', alignItems: 'start', height: '100%', flexDirection: 'column', py: 8, width: 800 }}>
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          width: '100%', 
-          mb: 4,
-          position: 'relative',
-          '&:hover .edit-button': { opacity: 1 }
-        }}
-      >
-        <Typography variant="h3" sx={{ color: theme.palette.text.primary, textAlign: 'start', flex: 1 }}>
-          {note?.title}
-        </Typography>
-        <IconButton
-          className="edit-button"
-          onClick={handleOpenEditTitle}
-          sx={{
-            position: 'absolute',
-            right: -40,
-            opacity: 0,
-            transition: 'opacity 0.2s',
-            color: 'white'
+    <Box sx={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      width: '100%',
+      flexGrow: 1,
+      pb: 4
+    }}>
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        py: 8, 
+        width: '100%',
+        maxWidth: 800,
+        px: 2
+      }}>
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            width: '100%', 
+            mb: 4,
+            position: 'relative',
+            '&:hover .edit-button': { opacity: 1 }
           }}
         >
-          <Edit />
-        </IconButton>
-      </Box>
-      <Divider sx={{ width: "100%", mb: 4, backgroundColor: theme.palette.divider }} />
-      {note?.nodes
-        .slice()
-        .sort((a, b) => a.order - b.order)
-        .map((node, index) => (
-        <Box key={node.id} sx={{ width: '100%' }}>
-          {node.content_type === 'text' ? (
-            <TextNode 
-              node={{ ...node, type: 'text', content: node.content || '' }} 
-              onDelete={handleDeleteNode}
-              onUpdateOrder={handleUpdateNodeOrder}
-              isFirst={index === 0}
-              isLast={index === note.nodes.length - 1}
-              isOnly={note.nodes.length === 1}
-            />
-          ) : (
-            <ImageNode 
-              node={{ ...node, type: 'image', content: node.content || '' }}
-              onDelete={handleDeleteNode}
-              onUpdateOrder={handleUpdateNodeOrder}
-              isFirst={index === 0}
-              isLast={index === note.nodes.length - 1}
-              isOnly={note.nodes.length === 1}
-            />
-          )}
+          <Typography variant="h3" sx={{ color: theme.palette.text.primary, textAlign: 'start', flex: 1 }}>
+            {note?.title}
+          </Typography>
+          <IconButton
+            className="edit-button"
+            onClick={handleOpenEditTitle}
+            sx={{
+              position: 'absolute',
+              right: -40,
+              opacity: 0,
+              transition: 'opacity 0.2s',
+              color: 'white'
+            }}
+          >
+            <Edit />
+          </IconButton>
         </Box>
-      ))}
-      <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
-        <Button
-          startIcon={<Add />}
-          onClick={() => handleAddNode('text')}
-        >
-          Добавить текстовую ячейку
-        </Button>
-        <Button
-          startIcon={<Image />}
-          onClick={() => handleAddNode('image')}
-        >
-          Добавить изображение
-        </Button>
-      </Stack>
+        <Divider sx={{ width: "100%", mb: 4, backgroundColor: theme.palette.divider }} />
+        {note?.nodes
+          .slice()
+          .sort((a, b) => a.order - b.order)
+          .map((node, index) => (
+          <Box key={node.id} sx={{ width: '100%' }}>
+            {node.content_type === 'text' ? (
+              <TextNode 
+                node={{ ...node, type: 'text', content: node.content || '' }} 
+                onDelete={handleDeleteNode}
+                onUpdateOrder={handleUpdateNodeOrder}
+                isFirst={index === 0}
+                isLast={index === note.nodes.length - 1}
+                isOnly={note.nodes.length === 1}
+              />
+            ) : (
+              <ImageNode 
+                node={{ ...node, type: 'image', content: node.content || '' }}
+                onDelete={handleDeleteNode}
+                onUpdateOrder={handleUpdateNodeOrder}
+                isFirst={index === 0}
+                isLast={index === note.nodes.length - 1}
+                isOnly={note.nodes.length === 1}
+              />
+            )}
+          </Box>
+        ))}
+        <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
+          <Button
+            startIcon={<Add />}
+            onClick={() => handleAddNode('text')}
+          >
+            Добавить текстовую ячейку
+          </Button>
+          <Button
+            startIcon={<Image />}
+            onClick={() => handleAddNode('image')}
+          >
+            Добавить изображение
+          </Button>
+        </Stack>
 
-      <Dialog open={isEditingTitle} onClose={() => setIsEditingTitle(false)}>
-        <DialogTitle>Редактирование заголовка</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Название"
-            variant="standard"
-            required
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            sx={{width: 400}}
-          />
-        </DialogContent>
-        <Divider />
-        <DialogActions sx={{display: 'flex', justifyContent: 'space-between'}}>
-          <Button onClick={handleUpdateTitle} color="primary">
-            Сохранить
-          </Button>
-          <Button onClick={() => setIsEditingTitle(false)} sx={{color: "text.secondary"}}>
-            Закрыть
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <Dialog open={isEditingTitle} onClose={() => setIsEditingTitle(false)}>
+          <DialogTitle>Редактирование заголовка</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Название"
+              variant="standard"
+              required
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              sx={{width: 400}}
+            />
+          </DialogContent>
+          <Divider />
+          <DialogActions sx={{display: 'flex', justifyContent: 'space-between'}}>
+            <Button onClick={handleUpdateTitle} color="primary">
+              Сохранить
+            </Button>
+            <Button onClick={() => setIsEditingTitle(false)} sx={{color: "text.secondary"}}>
+              Закрыть
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
     </Box>
   );
 };
