@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, IconButton, ListItem, ListItemIcon, Menu, MenuItem, Typography, useTheme } from '@mui/material';
+import { Box, IconButton, ListItem, ListItemIcon, Menu, MenuItem, Typography, useTheme, Snackbar, Alert } from '@mui/material';
 import { NavLink, useNavigate } from 'react-router-dom';
 import MoreIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -16,6 +16,7 @@ const NoteListItem = ({ note }: { note: ShortNote }) => {
   const { deleteNote, makeNotePublic, makeNotePrivate, archiveNote, unarchiveNote } = useNotesStore();
   
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const open = Boolean(menuAnchorEl);
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -51,6 +52,7 @@ const NoteListItem = ({ note }: { note: ShortNote }) => {
     event.stopPropagation();
     handleCloseMenu();
     navigator.clipboard.writeText(`${window.location.origin}/public/${note.public_id}`);
+    setOpenSnackbar(true);
   };
 
   const handleArchiveToggle = async (event: React.MouseEvent) => {
@@ -64,62 +66,67 @@ const NoteListItem = ({ note }: { note: ShortNote }) => {
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
+
   return (
-    <ListItem
-      component={NavLink}
-      to={`/note/${note.id}`}
-      sx={{
-        '&.active': {
-          backgroundColor: theme.palette.action.selected,
-          '&:hover': { backgroundColor: theme.palette.action.selected },
-        },
-        '&:hover': { backgroundColor: theme.palette.action.hover },
-        color: 'text.primary',
-        borderBottomColor: '#848484',
-        borderBottomWidth: 0.1,
-      }}
-    >
-      <Box
+    <>
+      <ListItem
+        component={NavLink}
+        to={`/note/${note.id}`}
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          gap: 1,
-          width: '100%',
-          alignItems: 'center',
-          px: 0.25,
-          py: 1,
+          '&.active': {
+            backgroundColor: theme.palette.action.selected,
+            '&:hover': { backgroundColor: theme.palette.action.selected },
+          },
+          '&:hover': { backgroundColor: theme.palette.action.hover },
+          color: 'text.primary',
+          borderBottomColor: '#848484',
+          borderBottomWidth: 0.1,
         }}
       >
         <Box
           sx={{
             display: 'flex',
-            flexGrow: 1,
-            flexDirection: 'column',
-            alignItems: 'start',
-            gap: 0.25,
-            overflow: 'hidden',
+            justifyContent: 'space-between',
+            gap: 1,
             width: '100%',
+            alignItems: 'center',
+            px: 0.25,
+            py: 1,
           }}
         >
-          <Typography
-            variant="body1"
-            sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 'medium', width: '100%' }}
+          <Box
+            sx={{
+              display: 'flex',
+              flexGrow: 1,
+              flexDirection: 'column',
+              alignItems: 'start',
+              gap: 0.25,
+              overflow: 'hidden',
+              width: '100%',
+            }}
           >
-            {note.title}
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'text.secondary', width: '100%' }}
-          >
-            {new Date(note.created_at).toLocaleDateString()}
-          </Typography>
+            <Typography
+              variant="body1"
+              sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 'medium', width: '100%' }}
+            >
+              {note.title}
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'text.secondary', width: '100%' }}
+            >
+              {new Date(note.created_at).toLocaleDateString()}
+            </Typography>
+          </Box>
+
+          <IconButton onClick={handleOpenMenu} sx={{ flexShrink: 0 }}>
+            <MoreIcon />
+          </IconButton>
         </Box>
-
-        <IconButton onClick={handleOpenMenu} sx={{ flexShrink: 0 }}>
-          <MoreIcon />
-        </IconButton>
-      </Box>
-
+      </ListItem>
       <Menu
         anchorEl={menuAnchorEl}
         open={open}
@@ -162,7 +169,17 @@ const NoteListItem = ({ note }: { note: ShortNote }) => {
           Удалить
         </MenuItem>
       </Menu>
-    </ListItem>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={2000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+          Ссылка успешно скопирована
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 

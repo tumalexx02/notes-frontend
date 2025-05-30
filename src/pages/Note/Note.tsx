@@ -1,6 +1,6 @@
 import { useTheme } from '@emotion/react';
-import { Box, Typography, TextField, Divider, Button, Stack, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from '@mui/material';
-import { Add, Image, Edit } from '@mui/icons-material';
+import { Box, Typography, TextField, Divider, Button, Stack, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Snackbar, Alert } from '@mui/material';
+import { Add, Image, Edit, ContentCopy, Public } from '@mui/icons-material';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FullNote, useNotesStore } from '../../store/NotesStore';
@@ -15,6 +15,7 @@ const NotePage = () => {
   const [note, setNote] = useState<FullNote | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [newTitle, setNewTitle] = useState('');
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const { getNote, getNotes } = useNotesStore();
 
   useEffect(() => {
@@ -110,22 +111,48 @@ const NotePage = () => {
     }
   }, [id, note]);
 
+  const handleCopyLink = () => {
+    if (note?.public_id) {
+      navigator.clipboard.writeText(`${window.location.origin}/public/${note.public_id}`);
+      setOpenSnackbar(true);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
+
   return (
     <Box sx={{ 
       display: 'flex', 
       justifyContent: 'center', 
       width: '100%',
-      flexGrow: 1,
+      height: '100%',
       pb: 4
     }}>
       <Box sx={{ 
         display: 'flex', 
+        justifyContent: 'start', 
+        alignItems: 'start', 
         flexDirection: 'column', 
         py: 8, 
         width: '100%',
+        height: '100%',
         maxWidth: 800,
         px: 2
       }}>
+        {note?.public_id && (
+          <Box color={theme.palette.text.secondary} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <Button
+              startIcon={<ContentCopy />}
+              onClick={handleCopyLink}
+              size="small"
+              sx={{color: theme.palette.text.secondary}}
+            >
+              Скопировать ссылку
+            </Button>
+          </Box>
+        )}
         <Box 
           sx={{ 
             display: 'flex', 
@@ -219,6 +246,17 @@ const NotePage = () => {
             </Button>
           </DialogActions>
         </Dialog>
+
+        <Snackbar
+          open={openSnackbar}
+          autoHideDuration={2000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+            Ссылка успешно скопирована
+          </Alert>
+        </Snackbar>
       </Box>
     </Box>
   );
